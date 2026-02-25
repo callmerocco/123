@@ -1,13 +1,10 @@
 {
   "version": 2,
+  "rewrites": [
+    { "source": "/cast", "destination": "/cast.html" },
+    { "source": "/show", "destination": "/show.html" }
+  ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1.html"
-    }
+    { "src": "/api/(.*)", "dest": "/api/$1.js" }
   ]
 }

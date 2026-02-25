@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Show Screen</title>
+</head>
+<body>
+<h1>Screen Receiver</h1>
+<video autoplay playsinline style="width:100%; height:100%;"></video>
+
+<script>
+const video = document.querySelector('video');
+const pc = new RTCPeerConnection();
+
+pc.ontrack = e => {
+  video.srcObject = e.streams[0];
+};
+
+async function getOffer() {
+  const res = await fetch('/api/offer');
+  const data = await res.json();
+
+  await pc.setRemoteDescription({ type: 'offer', sdp: data.sdp });
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  await fetch('/api/answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sdp: answer.sdp })
+  });
+}
+
+getOffer();
+</script>
+</body>
+</html>

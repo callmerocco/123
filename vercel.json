@@ -1,7 +1,4 @@
 {
   "version": 3,
-  "rewrites": [
-    { "source": "/cast", "destination": "/cast.html" },
-    { "source": "/show", "destination": "/show.html" }
-  ]
+  "cleanUrls": true
 }

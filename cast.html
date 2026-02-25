@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cast Your Screen</title>
+</head>
+<body>
+<h1>Cast Your Screen</h1>
+<button id="start">Start Casting</button>
+
+<script>
+const startBtn = document.getElementById('start');
+
+let pc;
+let ws;
+
+startBtn.onclick = async () => {
+  pc = new RTCPeerConnection();
+
+  // Capture screen
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+  stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+  // Data channel for signaling
+  const dc = pc.createDataChannel('signaling');
+
+  // Handle ICE
+  pc.onicecandidate = e => {
+    if (e.candidate) sendMessage({ candidate: e.candidate });
+  };
+
+  // Create offer
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  const res = await fetch('/api/offer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sdp: offer.sdp })
+  });
+  const data = await res.json();
+  await pc.setRemoteDescription({ type: 'answer', sdp: data.sdp });
+
+  alert('Casting started! Go to /show on your TV.');
+};
+
+async function sendMessage(msg) {
+  await fetch('/api/offer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(msg)
+  });
+}
+</script>
+</body>
+</html>
